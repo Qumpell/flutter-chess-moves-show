@@ -11,6 +11,7 @@ class MovesController extends GetxController {
 
   void updateChessboard(String newMove) {
     moveName.value = newMove;
+    moveName.refresh();
   }
 
   MovesController(int chessboardNumber) {
@@ -37,7 +38,7 @@ class MainApp extends StatelessWidget {
                   Text(
                     controller.moveName.value,
                     style: const TextStyle(fontSize: 24),
-                  )
+                    )
                 ],
               );
             }),
@@ -52,10 +53,12 @@ class MainApp extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           ElevatedButton(
-              onPressed: () async {
-                final result = await Get.to(() => ButtonPage(chessboardNumber: 1));
-              },
-              child: Text("Pierwsza szachownica")),
+            onPressed: () async{
+               final result = await Get.to(
+                () => ButtonPage(chessboardNumber: 1)
+            );
+            },
+            child: Text("Pierwsza szachownica")),
         ],
       ),
     );
@@ -75,16 +78,15 @@ class MainApp extends StatelessWidget {
 class ButtonPage extends StatelessWidget {
   final int chessboardNumber;
   final TextEditingController _textEditingController = TextEditingController();
-  ButtonPage({super.key, required this.chessboardNumber});
-
+  ButtonPage({required this.chessboardNumber});
+  final MovesController movesController = Get.put(MovesController(1));
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: GetX<MovesController>(
-      tag: chessboardNumber.toString(),
-      init: MovesController(chessboardNumber),
-      builder: (controller) {
-        return Column(
+    return Card(
+      child: Container(
+        width: 300,
+        height: 300,
+        child: Column(
           children: <Widget>[
             TextField(
               controller: _textEditingController,
@@ -92,12 +94,13 @@ class ButtonPage extends StatelessWidget {
             ),
             ElevatedButton(
                 onPressed: () {
-                  controller.updateChessboard(_textEditingController.text);
+                  movesController.updateChessboard(_textEditingController.text);
+                  Get.back(result: "WElcome back");
                 },
                 child: Text("Update moves"))
           ],
-        );
-      },
-    ));
+        ),
+      ),
+    );
   }
 }
