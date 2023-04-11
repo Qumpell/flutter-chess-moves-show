@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_chess_board/flutter_chess_board.dart';
 
 void main() {
   runApp(const MainApp());
@@ -7,7 +8,8 @@ void main() {
 
 class MovesController extends GetxController {
   final moveName = ''.obs;
-  final chessboard = '0'.obs;
+  // final chessboard = ''.obs;
+  final chessboard = "".obs;
 
   void updateChessboard(String newMove) {
     moveName.value = newMove;
@@ -24,97 +26,17 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Widget firstChessboardSection = Container(
-    //   color: Colors.amber,
-    //   child: Row(
-    //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //     children: <Widget>[
-    //       GetX<MovesController>(
-    //         tag: "1",
-    //         init: MovesController('1'),
-    //         builder: ((controller) {
-    //           return Column(
-    //             children: <Widget>[
-    //               Text(
-    //                 controller.moveName.value,
-    //                 style: const TextStyle(fontSize: 24),
-    //               ),
-    //               ElevatedButton(
-    //                   onPressed: () async {
-    //                     final result = await Get.to(() => ButtonPage(chessboardNumber: '1'));
-    //                     controller.updateChessboard(result);
-    //                   },
-    //                   child: Text("Pierwsza szachownica")),
-    //             ],
-    //           );
-    //         }),
-    //       ),
-    //     ],
-    //   ),
-    // );
-
-    // Widget secondChessboardSection = Container(
-    //   color: Colors.red,
-    //   child: Row(
-    //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //     children: <Widget>[
-    //       GetX<MovesController>(
-    //         tag: "2",
-    //         init: MovesController('2'),
-    //         builder: ((controller) {
-    //           return Column(
-    //             children: <Widget>[
-    //               Text(
-    //                 controller.moveName.value,
-    //                 style: const TextStyle(fontSize: 24),
-    //               ),
-    //               ElevatedButton(
-    //                   onPressed: () async {
-    //                     final result = await Get.to(() => ButtonPage(chessboardNumber: '2'));
-    //                     controller.updateChessboard(result);
-    //                   },
-    //                   child: Text("Druga szachownica")),
-    //             ],
-    //           );
-    //         }),
-    //       ),
-    //     ],
-    //   ),
-    // );
-
-    // Widget secondChessboardSection = Container(
-    //   color: Colors.brown,
-    //   child: Row(
-    //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //     children: <Widget>[
-    //       ElevatedButton(
-    //           onPressed: () async {
-    //             final result = await Get.to(() => ButtonPage(chessboardNumber: '1'));
-    //           },
-    //           // onPressed: () {
-    //           //   Get.to(() => ButtonPage(chessboardNumber: '1'));
-    //           // },
-    //           child: Text("Pierwsza szachownica")),
-    //     ],
-    //   ),
-    // );
-
     return GetMaterialApp(
       home: Scaffold(
           backgroundColor: Colors.black,
           body: Container(
             color: Colors.amber,
             child: Row(
-              // mainAxisAlignment: MainAxisAlignment.center,
-              // mainAxisSize: MainAxisSize.max,
-              // crossAxisAlignment: CrossAxisAlignment.baseline,
               children: const [
-                // firstChessboardSection,
-                // secondChessboardSection,
                 Expanded(child: ChessboardSection(chessboardNumber: "1")),
                 VerticalDivider(
                   width: 1.5,
-                  color: Colors.red,
+                  color: Colors.orange,
                   thickness: 1.5,
                 ),
                 Expanded(child: ChessboardSection(chessboardNumber: "2"))
@@ -129,23 +51,44 @@ class ButtonPage extends StatelessWidget {
   final String chessboardNumber;
   final TextEditingController _textEditingController = TextEditingController();
   ButtonPage({super.key, required this.chessboardNumber});
-
+  final Chess chess = Chess();
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: SizedBox(
-        height: 300,
+      child: Container(
+        color: Colors.orangeAccent,
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            TextField(
-              controller: _textEditingController,
-              decoration: const InputDecoration(labelText: "Enter fen"),
+            SizedBox(
+              width: 300,
+              child: TextField(
+                controller: _textEditingController,
+                decoration: const InputDecoration(
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
+                    labelText: "Enter fen",
+                    floatingLabelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
+                    labelStyle: TextStyle(color: Colors.white)),
+                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: ElevatedButton(
+                  onPressed: () {
+                    Get.back(result: _textEditingController.text);
+                  },
+                  style: ButtonStyle(backgroundColor: MaterialStateColor.resolveWith((states) => Colors.indigo)),
+                  child: const Text("Update moves")),
             ),
             ElevatedButton(
                 onPressed: () {
-                  Get.back(result: _textEditingController.text);
+                  _textEditingController.text = chess.generate_fen();
                 },
-                child: const Text("Update moves"))
+                style: ButtonStyle(backgroundColor: MaterialStateColor.resolveWith((states) => Colors.red)),
+                child: const Text("Default fen")),
           ],
         ),
       ),
@@ -155,13 +98,12 @@ class ButtonPage extends StatelessWidget {
 
 class ChessboardSection extends StatelessWidget {
   final String chessboardNumber;
-
   const ChessboardSection({super.key, required this.chessboardNumber});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.blue,
+      color: Colors.lightBlue,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
@@ -170,17 +112,29 @@ class ChessboardSection extends StatelessWidget {
             init: MovesController(chessboardNumber),
             builder: ((controller) {
               return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(
-                    controller.moveName.value,
-                    style: const TextStyle(fontSize: 24),
+                  ChessBoard(
+                    controller: ChessBoardController.fromFEN(controller.moveName.value),
+                    size: 300,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 35, top: 10, right: 20),
+                    child: Text(
+                      controller.moveName.value,
+                      style: const TextStyle(fontSize: 24, color: Colors.white),
+                    ),
                   ),
                   ElevatedButton(
-                      onPressed: () async {
-                        final result = await Get.to(() => ButtonPage(chessboardNumber: chessboardNumber));
-                        controller.updateChessboard(result);
-                      },
-                      child: Text("$chessboardNumber szachownica")),
+                    onPressed: () async {
+                      final result = await Get.to(() => ButtonPage(chessboardNumber: chessboardNumber));
+                      controller.updateChessboard(result);
+                    },
+                    style: ButtonStyle(
+                        overlayColor: MaterialStateColor.resolveWith((states) => Colors.green),
+                        backgroundColor: MaterialStateColor.resolveWith((states) => Colors.black)),
+                    child: Text("$chessboardNumber szachownica"),
+                  ),
                 ],
               );
             }),

@@ -10,6 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   get:
+  flutter_chess_board: ^1.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -17,3 +19,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+
